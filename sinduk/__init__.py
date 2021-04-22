@@ -23,7 +23,13 @@ def insert(resource_name: str):
     if password != password1:
         print("Both the passwords are not same. Enter the correct password.")
         return
+    
     dirname = os.path.expanduser("~/.sinduk")
+    # encrypting the password
+    ks = jce.KeyStore(dirname)
+    key = ks.get_all_keys()[0]
+    enc = ks.encrypt(key, password)
+
     filename = os.path.join(dirname,resource_name)
     # checking if the resource_name has `/` in it
     if resource_name.find("/"):
@@ -31,11 +37,9 @@ def insert(resource_name: str):
         # https://docs.python.org/3/library/os.html#os.makedirs 
         # if the directory exists do not throw any error
         os.makedirs(dirname, 0o700, True)
-        
     
-    with open(filename,"w") as fobj:
-        # TODO: encrypt the password
-        fobj.write(password)
+    with open(filename,"wb") as fobj:
+        fobj.write(enc)
     print(f"Password successfully saved under {resource_name}.")
     
 
