@@ -6,6 +6,7 @@ import sys
 import getpass
 import pathlib
 from typing import List
+import pyperclip as pc
 
 
 def init(keyfile: str):
@@ -47,7 +48,7 @@ def insert(resource_name: str):
     print(f"Password successfully saved under {resource_name}.")
 
 
-def show(resource_name: List[str]):
+def show(resource_name: List[str],clipboard: bool):
     accname = resource_name[0].strip()
     dirname = os.path.expanduser("~/.sinduk")
     ks = jce.KeyStore(dirname)
@@ -67,14 +68,22 @@ def show(resource_name: List[str]):
             enc = fobj.read()
             enctext = ks.decrypt(key, enc, password)
             text = enctext.decode("utf-8")
+            if clipboard:
+                pc.copy(text)
+            else:
+                print(text)
 
-            print(text)
+            
+    
+
+    
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--init", help="pass the OpenPGP key file ", type=str)
     parser.add_argument("--insert", help="pass the resource name", type=str)
+    parser.add_argument("-c", help="copy the password in the clipboard", action="store_true")
     parser.add_argument(
         "resource_name",
         metavar="resource_name",
@@ -88,5 +97,6 @@ def main():
         init(args.init)
     elif args.insert:
         insert(args.insert)
+    
     else:
-        show(args.resource_name)
+        show(args.resource_name, args.c)
